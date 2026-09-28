@@ -45,4 +45,4 @@ def connect_wifi_and_mqtt():
     else:
         print("\n[Erreur] Wi-Fi Timeout.")
 
-connect_wifi_and_mqtt()
+connect_wifi_and_mqtt()  

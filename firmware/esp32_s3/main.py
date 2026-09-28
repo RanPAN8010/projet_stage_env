@@ -1,7 +1,6 @@
 import time
 import gc
 
-# 1. 先尝试继承 boot.py 里已经占住网络通道的客户端
 try:
     import boot
     client = boot.mqtt_client
@@ -13,17 +12,13 @@ if client is None:
 else:
     print("[Info] Client MQTT initialisé avec succès.")
 
-# 2. 【核心修复】在导入大型硬件库之前，再次清理内存，并设置延迟
 print("Libération de la mémoire avant chargement des pilotes...")
 gc.collect()
 time.sleep(1)
-
-# 3. 此时网络已经连上，我们在最后一步才把沉重的 GPS 驱动请进内存
 print("Chargement des pilotes Pytrack et GPS...")
 from pycoproc_1 import Pycoproc
 from L76GNSS import L76GNSS
 
-# 4. 初始化硬件
 py = Pycoproc(Pycoproc.PYTRACK)
 gnss = L76GNSS(py, timeout=30)
 print("Matériel prêt. Démarrage de la collecte GPS...")
