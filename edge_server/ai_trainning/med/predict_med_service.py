@@ -15,7 +15,7 @@ def run_med_inference():
     data_path = os.path.join(base_project_dir, 'données', 'med_sensor_inference_test.csv')
     scaler_path = os.path.join(base_project_dir, 'ai_engine', 'med', 'data_scaler_xgboost.joblib')
     model_path = os.path.join(base_project_dir, 'ai_engine', 'med', 'xgboost_body_model.joblib')
-    output_path = os.path.join(base_project_dir, 'données', 'med_inference_output.csv')
+    output_path = os.path.join(base_project_dir, 'data', 'med_inference_output.csv')
 
     if not os.path.exists(data_path):
         print(f"Erreur : Fichier de données introuvable -> {data_path}")
