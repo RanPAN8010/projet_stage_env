@@ -127,6 +127,34 @@ Fichier généré : edge_server/data/driver_body_status_train.csv (Jeu de donné
  * python edge_server\ai_trainning\env\car_safety_xgboost_model.py
 
 ### 4. Inférence
+#### changer d'abord edge_server\ai_trainning\env\predict_service.py: de
+
+    current_path = os.path.abspath(__file__)
+    if "edge_server" in current_path:
+        base_project_dir = current_path.split("edge_server")[0] + "edge_server"
+    else:
+        print("Erreur : Le script n'est pas placé dans le dossier 'edge_server' !")
+        return
+
+    data_path = os.path.join(base_project_dir, 'données', 'med_sensor_inference_test.csv')
+    scaler_path = os.path.join(base_project_dir, 'ai_engine', 'med', 'data_scaler_xgboost.joblib')
+    model_path = os.path.join(base_project_dir, 'ai_engine', 'med', 'xgboost_body_model.joblib')
+    output_path = os.path.join(base_project_dir, 'données', 'med_inference_output.csv')
+#### à
+    current_path = os.path.abspath(__file__)
+
+    if "edge_server" in current_path:
+
+        base_project_dir = current_path.split("edge_server")[0] + "edge_server"
+
+    else:
+
+        print("Erreur : Le script n'est pas placé dans le dossier 'edge_server' !")
+
+        return
+    data_path = os.path.join(base_project_dir, 'data', 'sensor_data_for_ai 1.csv')
+    output_path = os.path.join(base_project_dir, 'data', 'sensor_inference_output.csv')
+ 
 ```Bash
  * python edge_server/ai_trainning/env/predict_service.py
 
