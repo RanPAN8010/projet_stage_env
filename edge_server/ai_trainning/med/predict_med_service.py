@@ -12,7 +12,7 @@ def run_med_inference():
         print("Erreur : Le script n'est pas placé dans le dossier 'edge_server' !")
         return
 
-    data_path = os.path.join(base_project_dir, 'données', 'med_sensor_inference_test.csv')
+    data_path = os.path.join(base_project_dir, 'data', 'med_sensor_inference_test.csv')
     scaler_path = os.path.join(base_project_dir, 'ai_engine', 'med', 'data_scaler_xgboost.joblib')
     model_path = os.path.join(base_project_dir, 'ai_engine', 'med', 'xgboost_body_model.joblib')
     output_path = os.path.join(base_project_dir, 'data', 'med_inference_output.csv')
