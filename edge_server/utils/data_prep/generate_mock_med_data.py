@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 def generate_mock_med_dataset():
     base_project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-    output_dir = os.path.join(base_project_dir, 'données')
+    output_dir = os.path.join(base_project_dir, 'data')
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, 'med_sensor_inference_test.csv')
 
