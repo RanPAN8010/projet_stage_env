@@ -10,3 +10,4 @@ edge_server/ai_engine/*
 !edge_server/ai_engine/med/.gitkeep
 !edge_server/ai_engine/env/.gitkeep
 !edge_server/ai_engine/inference_pipeline.py
+rapport/

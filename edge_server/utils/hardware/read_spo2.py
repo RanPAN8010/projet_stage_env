@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from bleak import BleakClient
 
-DEVICE_ADDRESS = "00:A0:50:04:1B:35" 
+DEVICE_ADDRESS = "00:A0:50:17:2F:14" 
 NOTIFY_CHARACTERISTIC_UUID = "49535343-1e4d-4bd9-ba61-23c647249616"
 
 start_time = time.time()
