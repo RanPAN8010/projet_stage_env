@@ -57,6 +57,79 @@ Ce projet est un système IoT complet développé entièrement en Python. Il uti
 
 ---
 
+## Préparation des jeux de données pour l'entraînement
+
+Ce projet repose sur l'entraînement de deux modèles d'IA distincts :
+1. **Modèle Environnemental** : Surveillance thermique de l'habitacle et détection précoce d'incendie.
+2. **Modèle Médical / Physiologique** : Suivi des constantes vitales du conducteur (détection de fatigue et alertes de crises cardiaques).
+
+Suivez les instructions ci-dessous pour télécharger les données brutes nécessaires et exécuter les scripts de préparation correspondants.
+
+---
+
+### 1. Modèle Environnemental (Sécurité Cabine)
+
+Ce modèle classifie la situation thermique et de sécurité du véhicule en 3 états : Sécurité (0), Canicule (1) et Incendie/Fumée (2).
+
+#### Données sources à télécharger :
+* **AutoTherm (Données thermiques habitacle)** :
+  * Lien : [Hugging Face - AutoTherm](https://huggingface.co/datasets/kopetri/AutoTherm)
+  * Fichiers requis : `train-00000-of-00001.parquet` et `test-00000-of-00001.parquet`
+  * Emplacement cible : `edge_server/data/`
+* **Smoke Detection Dataset (Données de détection d'incendie)** :
+  * Lien : [Kaggle - Smoke Detection Dataset](https://www.kaggle.com/datasets/deepcontractor/smoke-detection-dataset)
+  * Fichier requis : `smoke_detection_iot.csv`
+  * Emplacement cible : `edge_server/data/`
+
+#### Script de nettoyage et de fusion :
+Exécutez le script suivant pour calculer les caractéristiques dynamiques (taux de variation horaire et indice de chaleur) et fusionner les données :
+
+```bash
+python edge_server/utils/data_prep/clean_env_data.py
+
+* **Fichiers générés dans edge_server/data/** :
+
+  * final_train_data_5_features.csv (Jeu d'entraînement)
+
+  * final_test_data_5_features.csv (Jeu de test)
+
+### 2. Modèle Médical / Physiologique (État du Conducteur)
+
+Ce modèle évalue l'état de santé et de vigilance du conducteur en 3 catégories : Normal (0), Fatigue (1) et Crise cardiaque (2).
+
+#### Données sources à télécharger :
+* **Fatigueset (Détection du niveau de fatigue mentale) :
+  * Lien : Kaggle - Mental Fatigue Level Detection (https://www.kaggle.com/datasets/tanjemahamed/mental-fatigue-level-detection-fatigueset-data)
+  * Format : Archive contenant les dossiers des participants et des sessions (fichiers wrist_hr.csv, wrist_skin_temperature.csv, chest_rr_interval.csv et exp_fatigue.csv).
+  * Emplacement cible : Décompresser l'archive complète sous le dossier 'edge_server/data/'
+
+* **Heart Disease Dataset (Maladies cardiaques) :
+ * Lien : Kaggle - Heart Disease Dataset (https://www.kaggle.com/datasets/sid321axn/heart-statlog-cleveland-hungary-final)
+ * Fichier requis : heart_statlog_cleveland_hungary_final.csv
+ * Emplacement cible : edge_server/data/
+
+#### Scripts de préparation (à exécuter dans cet ordre) :
+Nettoyage, filtrage et rééchantillonnage temporel des signaux de fatigue (fenêtre de 1 seconde) :
+
+```Bash
+python edge_server/utils/data_prep/clean_fatigueset.py
+Fichier généré : edge_server/data/fatigueset_cleaned.csv
+
+Extraction des indicateurs cardiaques (HeartRate, HRV) et fusion avec le jeu de fatigue :
+
+```Bash
+python edge_server/utils/data_prep/merge_heart_and_fatigue.py
+Fichier généré : edge_server/data/driver_body_status_train.csv (Jeu de données final prêt pour l'entraînement du modèle physiologique)
+
+### 3. Trainning
+```Bash
+ * python edge_server\ai_trainning\med\train_xgboost.py
+ * python edge_server\ai_trainning\env\car_safety_xgboost_model.py
+
+### 4. Inférence
+```Bash
+ * python edge_server/ai_trainning/env/predict_service.py
+
 ## 👤 Organisation et répartition des tâches
 
 * **Pan RAN** : Développement complet et autonome du projet de bout en bout. Réalisation des scripts MicroPython sur PyCharm pour la détection bi-puce (ESP32-S3 et FiPy 1.0), mise en place du protocole de communication sur le réseau local, configuration du serveur Raspberry Pi et déploiement du modèle d'IA pour la détection des urgences.
