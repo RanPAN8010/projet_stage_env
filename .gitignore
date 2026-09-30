@@ -7,7 +7,5 @@ logs.log
 edge_server/data/*
 !edge_server/data/.gitkeep
 edge_server/ai_engine/*
-!edge_server/ai_engine/med/.gitkeep
-!edge_server/ai_engine/env/.gitkeep
-!edge_server/ai_engine/inference_pipeline.py
+!edge_server/ai_engine/.gitkeep
 rapport/

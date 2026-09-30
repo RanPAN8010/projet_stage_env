@@ -11,7 +11,7 @@ def train_final_model():
     
     train_path = os.path.join(data_dir, 'final_train_data_5_features.csv')
     test_path = os.path.join(data_dir, 'final_test_data_5_features.csv')
-    model_output_path = os.path.join(base_project_dir, 'ai_engine', 'env', 'car_safety_xgboost_model.json')
+    model_output_path = os.path.join(base_project_dir, 'ai_engine', 'car_safety_xgboost_model.json')
     
     print("Chargement des données de train et test...")
     df_train = pd.read_csv(train_path)

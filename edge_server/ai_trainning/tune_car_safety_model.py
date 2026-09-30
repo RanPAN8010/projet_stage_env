@@ -7,9 +7,7 @@ from sklearn.metrics import classification_report
 import xgboost as xgb
 
 def tune_hyperparameters():
-    # ==========================================
-    # 动态路径定位（保持与你的项目结构一致）
-    # ==========================================
+    # 动态路径定位
     current_path = os.path.abspath(__file__)
     if "edge_server" in current_path:
         base_project_dir = current_path.split("edge_server")[0] + "edge_server"
@@ -27,16 +25,12 @@ def tune_hyperparameters():
     X_train = df_train[feature_cols]
     y_train = df_train['Label']
     
-    # ==========================================
-    # 核心策略 1：计算样本权重（专门对付 Canicule 样本极少的问题）
-    # ==========================================
+    # 计算样本权重（专门对付 Canicule 样本极少的问题）
     print("Calcul des poids des classes pour équilibrer le jeu de données...")
     # 'balanced' 会自动给稀少样本赋予更高的权重权重
     sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
-    
-    # ==========================================
-    # 核心策略 2：定义超参数搜索网格
-    # ==========================================
+
+    # 定义超参数搜索网格
     # 限制了搜索空间的范围（因为100万行数据太大，范围太广会搜得很慢）
     param_grid = {
         'max_depth': [5, 7],               # 树的深度（5或7）
@@ -59,17 +53,15 @@ def tune_hyperparameters():
         estimator=base_model,
         param_grid=param_grid,
         cv=3,
-        scoring='f1_macro', # 核心：使用 f1_macro 会强迫模型必须把高温天气（少数类）也预测对
+        scoring='f1_macro', # 使用 f1_macro 会强迫模型必须把高温天气（少数类）也预测对
         n_jobs=-1,          # 开启所有 CPU 核心多线程并行加速
         verbose=2
     )
     
-    # 执行搜索，同时传入我们算好的类别平衡权重
+    # 执行搜索，同时传入类别平衡权重
     grid_search.fit(X_train, y_train, sample_weight=sample_weights)
     
-    # ==========================================
     # 输出最佳参数结果
-    # ==========================================
     print("\n==================================================")
     print("=== Optimisation terminée avec succès ! ===")
     print("==================================================")

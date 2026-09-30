@@ -24,14 +24,16 @@ def calculate_heat_index(T_celsius, RH):
 # Charge les données brutes des capteurs, calcule les caractéristiques dynamiques, 
 # exécute les prédictions du modèle XGBoost et exporte les statistiques détaillées.
 def test_inference_performance():
-    # 从 ai_engine/env 向上退两级，定位到项目根目录
-    base_project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-
-    # 对应实际树莓派中的 données 目录及文件名
-    data_path = os.path.join(base_project_dir, 'données', 'sensor_data_for_ai.csv')
-    model_path = os.path.join(base_project_dir, 'ai_engine', 'env', 'car_safety_xgboost_model.json')
-    output_path = os.path.join(base_project_dir, 'données', 'sensor_inference_output.csv')
-    
+    current_path = os.path.abspath(__file__)
+    if "edge_server" in current_path:
+        base_project_dir = current_path.split("edge_server")[0] + "edge_server"
+    else:
+        print("Erreur : Le script n'est pas placé dans le dossier 'edge_server' !")
+        return
+    data_path = os.path.join(base_project_dir, 'data', 'sensor_data_for_ai.csv')
+    model_path = os.path.join(base_project_dir, 'ai_engine', 'car_safety_xgboost_model.json')
+    output_path = os.path.join(base_project_dir, 'data', 'sensor_inference_output.csv')
+ 
     if not os.path.exists(data_path) or not os.path.exists(model_path):
         print("Erreur : Fichiers manquants.")
         return
