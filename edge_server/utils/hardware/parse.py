@@ -16,8 +16,10 @@ async def process_fipy_gps_data():
                 continue
                 
             # 遍历提取任意可能出现的 Key 结构
+            # Parcourir et extraire toute structure de clé potentiellement présente
             for company_id, raw_bytes in raw_data.items():
                 # 字节长度如果是 8 字节（2个长整数），直接强制解包
+                # Si la taille est de 8 octets (2 entiers longs), forcer directement le dépaquetage
                 if len(raw_bytes) == 8:
                     try:
                         lat_raw, lon_raw = struct.unpack("<ii", raw_bytes)

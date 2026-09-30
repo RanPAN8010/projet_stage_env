@@ -7,7 +7,6 @@ from sklearn.metrics import classification_report
 import xgboost as xgb
 
 def tune_hyperparameters():
-    # 动态路径定位
     current_path = os.path.abspath(__file__)
     if "edge_server" in current_path:
         base_project_dir = current_path.split("edge_server")[0] + "edge_server"
@@ -26,20 +25,25 @@ def tune_hyperparameters():
     y_train = df_train['Label']
     
     # 计算样本权重（专门对付 Canicule 样本极少的问题）
+    # Calcul des poids des échantillons (spécifiquement pour traiter la rareté des données de Canicule)
     print("Calcul des poids des classes pour équilibrer le jeu de données...")
     # 'balanced' 会自动给稀少样本赋予更高的权重权重
+    # 'balanced' attribue automatiquement un poids plus élevé aux classes minoritaires
     sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
 
     # 定义超参数搜索网格
-    # 限制了搜索空间的范围（因为100万行数据太大，范围太广会搜得很慢）
+    # Définition de la grille de recherche des hyperparamètres
     param_grid = {
-        'max_depth': [5, 7],               # 树的深度（5或7）
-        'learning_rate': [0.05, 0.1],      # 学习率
+        'max_depth': [5, 7],               # 树的深度（5或7）Profondeur maximale des arbres (5 ou 7)
+        'learning_rate': [0.05, 0.1],      # 学习率 Taux d'apprentissage
+        # Poids minimal requis pour créer une feuille 
+        # (une valeur plus élevée limite le surapprentissage sur la classe minoritaire)
         'min_child_weight': [1, 3],        # 决定叶子节点合并的最小权重（越大越防少数类过拟合）
-        'n_estimators': [100]              # 保持基木树量为 100
+        'n_estimators': [100]              # 保持基木树量为 100 Maintenir le nombre d'arbres de base à 100
     }
     
     # 初始化基础三分类模型
+    # Initialisation du modèle de classification à 3 classes de base
     base_model = xgb.XGBClassifier(
         objective='multi:softprob',
         num_class=3,
@@ -47,21 +51,24 @@ def tune_hyperparameters():
         eval_metric='mlogloss'
     )
     
-    # 3折交叉验证 (cv=3)，聚焦提升不均衡样本的 f1_macro 指标
+    # 3折交叉验证 (cv=3)
+    # Validation croisée à 3 blocs (cv=3),
     print("Lancement de la recherche par grille (GridSearchCV) avec validation croisée...")
     grid_search = GridSearchCV(
         estimator=base_model,
         param_grid=param_grid,
         cv=3,
-        scoring='f1_macro', # 使用 f1_macro 会强迫模型必须把高温天气（少数类）也预测对
-        n_jobs=-1,          # 开启所有 CPU 核心多线程并行加速
+        scoring='f1_macro', # L'usage de f1_macro contraint le modèle à classifier correctement la classe minoritaire (Canicule)
+        n_jobs=-1,          # Activer l'accélération parallèle en utilisant tous les cœurs du processeur
         verbose=2
     )
     
     # 执行搜索，同时传入类别平衡权重
+    # Lancer la recherche en appliquant les poids d'équilibrage des classes
     grid_search.fit(X_train, y_train, sample_weight=sample_weights)
     
     # 输出最佳参数结果
+    # Afficher les paramètres optimaux obtenus
     print("\n==================================================")
     print("=== Optimisation terminée avec succès ! ===")
     print("==================================================")

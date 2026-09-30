@@ -24,24 +24,29 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     try:
-	#解码
+	#解码 Décodage
         payload_str = msg.payload.decode('utf-8')
         print(f"Données brute reçues: {payload_str}")
         
         #解析 JSON 数据
+        # Analyse des données JSON
         data = json.loads(payload_str)
         temperature = data.get("temperature")
         humidity = data.get("humidity")
         
         #  数据合规性检查防止传感器异常产生的空数据污染训练集
+        # Vérification de la conformité des données 
+        # pour éviter que des valeurs nulles dues à des anomalies de capteur ne corrompent le dataset
         if temperature is None or humidity is None:
             print("Données incomplètes reçues.")
             return
             
         #获取当前时间戳
+        # Récupération de l'horodatage actuel
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         #写入 CSV 文件
+        # Écriture dans le fichier CSV
         with open(CSV_FILE_PATH, mode='a', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow([current_time, temperature, humidity])
