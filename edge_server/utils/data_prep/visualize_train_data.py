@@ -25,6 +25,7 @@ def generate_environmental_plots():
     df = pd.read_csv(data_path)
     
     # 建立显式的标签映射，以便生成清晰的图例
+    # Établir un mappage explicite des étiquettes afin de générer une légende claire
     mapping_labels_francais = {
         0: "Sécurité",
         1: "Canicule",
@@ -35,12 +36,13 @@ def generate_environmental_plots():
     # Configuration du thème graphique / 配置图表主题
     sns.set_theme(style="whitegrid")
     palette_couleurs = {
-        "Sécurité": "#3498db",      # 蓝色表示安全
-        "Canicule": "#e67e22",      # 橙色表示极端高温
-        "Feu / Fumée": "#e74c3c"    # 红色表示火灾烟雾
+        "Sécurité": "#3498db",      # Bleu pour Sécurité
+        "Canicule": "#e67e22",      # Orange pour Canicule
+        "Feu / Fumée": "#e74c3c"    # Rouge pour Feu / Fumée
     }
     
     # 计算分位数，以便在可视化时自动剔除极端离群点（Outliers）造成的画面拉伸
+    # Calculer les quantiles pour éliminer automatiquement les valeurs aberrantes (outliers) et éviter la déformation des graphiques
     q_low_temp, q_hi_temp = df['Temperature'].quantile(0.005), df['Temperature'].quantile(0.995)
     q_low_hum, q_hi_hum = df['Humidity'].quantile(0.005), df['Humidity'].quantile(0.995)
     q_low_tr, q_hi_tr = df['Temp_Rate'].quantile(0.01), df['Temp_Rate'].quantile(0.99)
@@ -48,6 +50,7 @@ def generate_environmental_plots():
 
 
     # 图表 1 : 散点图 (温度 vs 湿度的绝对空间分布)
+    # Graphique 1 : Nuage de points 
     print("Génération du Graphe 1 : Nuage de points...")
     plt.figure(figsize=(10, 6))
     
@@ -76,22 +79,26 @@ def generate_environmental_plots():
     plt.close()
     
     # 图表 2 : 箱线图 (静态特征与动态变动率的分布对比)
+    # Graphique 2 : Boîtes à moustaches 
     print("Génération du Graphe 2 : Boîtes à moustaches...")
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     
     # 温度绝对值分布箱线图
+    # Boîte à moustaches de la distribution de la température absolue
     sns.boxplot(ax=axes[0, 0], data=df, x='État Environnemental', y='Temperature', hue='État Environnemental', palette=palette_couleurs, legend=False, fliersize=1)
     axes[0, 0].set_title("Distribution de la Température Absolue", fontsize=11, fontweight='bold')
     axes[0, 0].set_ylabel("Température (°C)")
     axes[0, 0].set_xlabel("")
     
     # 湿度绝对值分布箱线图
+    # Boîte à moustaches de la distribution de l'humidité absolue
     sns.boxplot(ax=axes[0, 1], data=df, x='État Environnemental', y='Humidity', hue='État Environnemental', palette=palette_couleurs, legend=False, fliersize=1)
     axes[0, 1].set_title("Distribution de l'Humidité Absolue", fontsize=11, fontweight='bold')
     axes[0, 1].set_ylabel("Humidité (%)")
     axes[0, 1].set_xlabel("")
     
     # 温度变化率分布箱线图
+    # Boîte à moustaches du taux de variation de la température
     sns.boxplot(ax=axes[1, 0], data=df, x='État Environnemental', y='Temp_Rate', hue='État Environnemental', palette=palette_couleurs, legend=False, fliersize=1)
     axes[1, 0].set_ylim(q_low_tr - 0.5, q_hi_tr + 0.5)
     axes[1, 0].set_title("Taux de Variation de la Température", fontsize=11, fontweight='bold')
@@ -99,6 +106,7 @@ def generate_environmental_plots():
     axes[1, 0].set_xlabel("État Environnemental")
     
     # 湿度变化率分布箱线图
+    # Boîte à moustaches du taux de variation de l'humidité
     sns.boxplot(ax=axes[1, 1], data=df, x='État Environnemental', y='Humidity_Rate', hue='État Environnemental', palette=palette_couleurs, legend=False, fliersize=1)
     axes[1, 1].set_ylim(q_low_hr - 1.0, q_hi_hr + 1.0)
     axes[1, 1].set_title("Taux de Variation de l'Humidité", fontsize=11, fontweight='bold')
@@ -113,11 +121,13 @@ def generate_environmental_plots():
     plt.close()
     
 
-    #  图表 3 : 直方图与密度曲线 (分析动态跳变 Delta Net 的数学可分性)
+    # 图表 3 : 直方图与密度曲线 (分析动态跳变 Delta Net 的数学可分性)
+    # Graphique 3 : Histogrammes et courbes de densité
     print("Génération du Graphe 3 : Courbes de densité des taux de variation...")
     fig, axes = plt.subplots(2, 1, figsize=(10, 8))
     
     # 温度变化量的概率密度分布
+    # Distribution de densité de probabilité de la variation de température
     sns.histplot(
         ax=axes[0], data=df, x='Temp_Rate', hue='État Environnemental',
         palette=palette_couleurs, element='step', stat='density', common_norm=False, alpha=0.25, kde=True
@@ -128,6 +138,7 @@ def generate_environmental_plots():
     axes[0].set_ylabel("Densité")
     
     # 湿度变化量的概率密度分布
+    # Distribution de densité de probabilité de la variation d'humidité
     sns.histplot(
         ax=axes[1], data=df, x='Humidity_Rate', hue='État Environnemental',
         palette=palette_couleurs, element='step', stat='density', common_norm=False, alpha=0.25, kde=True

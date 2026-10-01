@@ -4,7 +4,7 @@ import os
 # dataset2 https://huggingface.co/datasets/kopetri/AutoTherm
 # dataset1 https://www.kaggle.com/datasets/deepcontractor/smoke-detection-dataset
 
-#pour calculer l'index de chaude
+#pour calculer l'index de chaleur
 def calculate_heat_index(T_celsius, RH):
     T_f = T_celsius * 1.8 + 32
     HI_f = 0.5 * (T_f + 61.0 + ((T_f - 68.0) * 1.2) + (RH * 0.094))
@@ -28,7 +28,7 @@ def process_car_data(file_path):
     df['Timestamp'] = pd.to_datetime(df['Timestamp'])
     df = df.sort_values(by=['file_name', 'Timestamp']).reset_index(drop=True)
     
-    # 纯数值单步绝对跳变特征
+    # Caractéristiques de variation brute pas à pas
     df['Temp_Rate'] = df['Ambient_Temperature'].diff()
     df['Humidity_Rate'] = df['Ambient_Humidity'].diff()
     

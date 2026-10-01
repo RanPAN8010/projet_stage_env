@@ -27,9 +27,8 @@ def train_final_model():
     print(f"Échantillons d'entraînement : {X_train.shape[0]} lignes")
     print(f"Échantillons de test : {X_test.shape[0]} lignes")
     
-
-    # 放弃 sample_weight 自动平衡
     # 移除过度加权，防止常温背景行被错误放大
+    # Suppression de la surpondération pour éviter d'amplifier à tort les lignes de référence à température ambiante
     print("Entraînement du modèle XGBoost à 3 classes (Sécurité, Canicule, Feu)...")
     model = xgb.XGBClassifier(
         n_estimators=100,

@@ -3,7 +3,7 @@ import time
 import machine
 import config
 from simple import MQTTClient
-import gc # 导入垃圾回收器
+import gc
 
 mqtt_client = None
 
@@ -11,6 +11,7 @@ def connect_wifi_and_mqtt():
     global mqtt_client
     
     # 在最开始强制回收一次内存，确保 Wi-Fi 享有最高优先级内存
+    # Forcer la libération de la mémoire au tout début afin d'allouer un maximum de mémoire prioritaire au Wi-Fi
     gc.collect()
     
     wlan = WLAN(mode=WLAN.STA)
@@ -40,7 +41,6 @@ def connect_wifi_and_mqtt():
             print("[BOOT Erreur] Échec MQTT : {}".format(e))
             mqtt_client = None
             
-        # 连接成功后，再次强制回收网络栈产生的临时垃圾
         gc.collect()
     else:
         print("\n[Erreur] Wi-Fi Timeout.")

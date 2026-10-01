@@ -39,7 +39,6 @@ while True:
         except Exception as e:
             print("[Erreur] Perte de connexion : {}".format(e))
             client.sock = None
-            
-    # 定期在循环底部回收垃圾，防止内存泄漏导致网卡再次挂掉
+
     gc.collect()
     time.sleep(5)
