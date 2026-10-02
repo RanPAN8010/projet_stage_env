@@ -1,55 +1,61 @@
 Système de Surveillance Environnementale Embarqué (IoT & IA)
-Présentation du projet
 
-Ce projet est un système IoT de surveillance environnementale pour habitacle de véhicule. Il utilise une architecture de collecte redondante composée de deux nœuds (ESP32-S3 et Pycom FiPy 1.0) transmettant les mesures physiques à un serveur edge (Raspberry Pi). Un modèle XGBoost embarqué analyse les flux temporels (température, humidité, variations dynamiques et indice de chaleur) afin de classifier l'état en trois niveaux : Sécurité (0), Canicule (1) et Incendie/Fumée (2).
+Description du projet
+Ce projet surveille l'environnement dans une voiture. Deux cartes électroniques (ESP32-S3 et Pycom FiPy) mesurent les données et les envoient à un micro-ordinateur Raspberry Pi. Un modèle d'intelligence artificielle (XGBoost) analyse ces données (température, humidité, chaleur) pour détecter trois états :
 
-Architecture globale
+0 : Normal (sécurité)
 
-[ Nœud ESP32-S3 ] (MicroPython) ------+
-                                        |--> [ Raspberry Pi ] --> [ Inférence XGBoost ] --> Alertes
-[ Nœud Pycom FiPy 1.0 ] (MicroPython) +
+1 : Forte chaleur (canicule)
 
-Structure du projet
+2 : Danger (fumée ou début d'incendie)
 
-.gitignore
-README.md
-edge_server/
-ai_engine/          : Modèle entraîné (car_safety_xgboost_model.json)
-ai_trainning/       : Scripts d'entraînement et d'optimisation
-data/               : Jeux de données bruts et préparés
-network/            : Scripts de réception réseau
-utils/
-data_prep/      : Nettoyage, fusion et visualisation des données
-hardware/       : Pilotes matériels et tests des capteurs
-requirements.txt    : Dépendances Python
-firmware/
-esp32_s3/           : Programme MicroPython ESP32-S3
-fipy_10/            : Programme MicroPython FiPy 1.0
+Fonctionnement du réseau
+L'ESP32 et le FiPy mesurent la température et l'humidité.
+Ils envoient les données par Wi-Fi (protocole MQTT) au Raspberry Pi.
+Le Raspberry Pi enregistre les données et applique le modèle d'IA pour déclencher des alertes si nécessaire.
 
-Guide d'exécution
+Organisation des dossiers
 
-Étape 1 : Préparation des données
-Télécharger dans edge_server/data/ :
+firmware/ : contient le code MicroPython pour les cartes ESP32 et FiPy.
 
-[AutoTherm (Hugging Face) :](https://huggingface.co/datasets/kopetri/AutoTherm) train-00000-of-00001.parquet, test-00000-of-00001.parquet
+edge_server/data/ : stocke les jeux de données bruts, les données préparées et les mesures des capteurs.
 
+edge_server/utils/ : contient les scripts pour nettoyer les données et tester le matériel.
 
-[Smoke Detection Dataset (Kaggle) :](https://www.kaggle.com/datasets/deepcontractor/smoke-detection-dataset) smoke_detection_iot.csv
+edge_server/ai_trainning/ : contient les scripts pour entraîner et tester le modèle d'IA.
 
-Lancer la fusion des caractéristiques :
-python edge_server/utils/data_prep/clean_env_data.py
--> Fichiers générés : final_train_data_5_features.csv, final_test_data_5_features.csv
+edge_server/ai_engine/ : contient le modèle final entraîné au format JSON.
 
-Étape 2 : Entraînement du modèle XGBoost
-Lancer l'entraînement :
-python edge_server/ai_trainning/car_safety_xgboost_model.py
--> Modèle exporté : edge_server/ai_engine/car_safety_xgboost_model.json
+Collecte des données réelles
+Étape 1 : Connexion au Raspberry Pi
+Branchez le câble réseau et l'alimentation sur le Raspberry Pi.
+Connectez-vous en SSH avec PuTTY à l'adresse 10.3.183.6 (identifiant : pi, mot de passe : raspberry).
+Vérifiez l'adresse Wi-Fi du Raspberry Pi avec la commande ip a show wlan0.
 
-(Optionnel) Optimisation des hyperparamètres et AutoML :
-python edge_server/ai_trainning/tune_hyperparameters.py
-python edge_server/ai_trainning/car_safety_automl_selection.py
+Étape 2 : Réception des données
+Sur le Raspberry Pi, entrez dans le dossier ~/IoT puis lancez la commande python data_logger.py. Le programme attend les messages de l'ESP32.
 
-Étape 3 : Inférence et Évaluation
-Tester les prédictions sur les données capteurs :
-python edge_server/ai_trainning/predict_service.py
--> Résultats exportés : edge_server/data/sensor_inference_output.csv
+Étape 3 : Envoi des données depuis l'ESP32
+Ouvrez votre logiciel de programmation (Thonny).
+Dans le fichier config.py, renseignez le nom de votre réseau Wi-Fi, son mot de passe et l'adresse IP Wi-Fi du Raspberry Pi.
+Lancez le fichier boot.py puis main.py. L'ESP32 envoie alors une mesure toutes les cinq secondes.
+
+Étape 4 : Récupération du fichier
+Sur le Raspberry Pi, les mesures sont écrites dans sensor_data_for_ai.csv.
+Utilisez le logiciel WinSCP pour copier ce fichier sur votre ordinateur dans le dossier edge_server/data/.
+
+Entraînement et test de l'IA
+Étape 1 : Préparation
+Téléchargez les jeux de données AutoTherm et Smoke Detection dans le dossier edge_server/data/.
+Lancez la commande : python edge_server/utils/data_prep/clean_env_data.py. Cela génère les fichiers finaux pour l'entraînement.
+
+Étape 2 : Optimisation (optionnel)
+Pour trouver les meilleurs réglages, lancez : python edge_server/ai_trainning/tune_car_safety_model.py.
+Les paramètres retenus sont : learning_rate = 0.05, max_depth = 5, min_child_weight = 1, n_estimators = 100.
+
+Étape 3 : Entraînement
+Lancez : python edge_server/ai_trainning/car_safety_xgboost_model.py. Le modèle fini s'enregistre dans edge_server/ai_engine/car_safety_xgboost_model.json.
+
+Étape 4 : Prédiction sur vos capteurs
+Vérifiez que votre fichier de mesures réelles est bien nommé sensor_data_for_ai.csv dans le dossier data.
+Lancez la commande : python edge_server/ai_trainning/predict_service.py. Les prédictions finales s'enregistrent dans sensor_inference_output.csv.
