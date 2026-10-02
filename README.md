@@ -26,6 +26,20 @@ edge_server/ai_trainning/ : contient les scripts pour entraîner et tester le mo
 
 edge_server/ai_engine/ : contient le modèle final entraîné au format JSON.
 
+## Câblage Matériel
+
+Ce projet utilise une carte ESP32-S3 connectée à un module capteur de température et d'humidité DHT11.
+
+> **Remarque** : L'ordre des broches du module DHT11, de gauche à droite, est S (Data), VCC (Alimentation) et GND (Masse).
+
+### Correspondance des broches
+
+| Broche du module DHT11 | Broche ESP32-S3 | Description |
+| :--- | :--- | :--- |
+| **Broche 1 (S / Data)** | **GPIO X** | Transmission des données |
+| **Broche 2 (VCC)** | **3V3** | Alimentation 3.3V |
+| **Broche 3 (GND)** | **GND** | Masse | 
+
 Collecte des données réelles
 Étape 1 : Connexion au Raspberry Pi
 Branchez le câble réseau et l'alimentation sur le Raspberry Pi.
